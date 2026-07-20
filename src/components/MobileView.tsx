@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MenuItem, CartItem, Category } from "../types";
-import { categories as defaultCategories } from "../Data";
+import { categories as defaultCategories } from "../menuData";
 import { LocalDB } from "../lib/db";
 import TableFloorplan from "./TableFloorplan";
 
