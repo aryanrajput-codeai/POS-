@@ -1389,6 +1389,7 @@ export class LocalDB {
             return v.toString(16);
           });
 
+          item.id = newId;
           mappedPayload.id = newId;
 
           inserts.push({
