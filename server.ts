@@ -512,23 +512,7 @@ async function startServer() {
 
     const emailLower = email.toLowerCase().trim();
 
-    // 1. Check Super Admin access (superadmin@webrajyapos.com / super123 or password123)
-    const isSuperAdminEmail = emailLower === "superadmin@webrajyapos.com";
-    const isSuperAdminPassword = password === "super123" || password === "password123";
-
-    if (isSuperAdminEmail && isSuperAdminPassword) {
-      const payload = btoa(JSON.stringify({ 
-        sub: "webrajya_pos_superadmin_id", 
-        role: "SuperAdmin", 
-        email: emailLower 
-      }));
-      const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-      const mockSignature = "r9U_63r-9saV_77f_93n-c";
-      const token = `${header}.${payload}.${mockSignature}`;
-      return res.json({ token, role: "SuperAdmin", email: emailLower });
-    }
-
-    // 2. Check Developer Master credentials
+    // 1. Check Developer Master credentials
     const isMasterEmail = emailLower === "admin@webrajyapos.com";
     const isMasterPassword = password === "admin123" || password === "password123";
 
