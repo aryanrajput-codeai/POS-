@@ -1,5 +1,5 @@
 import { MenuItem, Review, KOT, KOTStatus, OrderItem, RestaurantTable, PrinterEmulatorLog, Category } from "../types";
-import { menuItems as defaultMenuItems, reviews as defaultReviews, categories as defaultCategories } from "../Data";
+import { menuItems as defaultMenuItems, reviews as defaultReviews, categories as defaultCategories } from "../menuData";
 
 const dummyChain: any = {
   from: () => dummyChain,
