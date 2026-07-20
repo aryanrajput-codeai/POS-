@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Search, Sparkles, Flame, Check, ThumbsUp, Leaf } from "lucide-react";
 import { motion } from "motion/react";
-import { categories } from "../menuData";
+import { categories } from "../data";
 import { Category } from "../types";
 
 interface HeaderProps {
