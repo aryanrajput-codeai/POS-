@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Shield, Mail, Lock, Eye, EyeOff, Sparkles, KeyRound, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { LocalDB } from "../lib/db";
+import { LocalDB, supabase, isSupabaseConfigured } from "../lib/db";
 
 interface AdminLoginProps {
   onLoginSuccess: (token: string, rememberMe: boolean) => void;
@@ -39,49 +39,85 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     }
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password: password.trim() })
-      });
+      let loginSuccess = false;
+      let token = "";
+      let restaurantData: any = null;
 
-      if (response.ok) {
-        const data = await response.json();
+      // 1. Attempt API server authentication first
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim(), password: password.trim() })
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          loginSuccess = true;
+          token = data.token;
+          restaurantData = data.restaurant;
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          setErrorCode(errData.error || `Authentication failed (Status ${response.status}). Check registered credentials.`);
+          LocalDB.addAuditLog("Access Denied", `Failed login attempt for ${email}`, "System Gateway");
+          return;
+        }
+      } catch (networkErr: any) {
+        // API server endpoint not present (static SPA deployment) — fallback to direct Supabase Auth or Local DB
+        console.info("[Auth System] /api/auth/login endpoint unreachable. Falling back to Supabase client authentication.", networkErr?.message);
+        
+        if (isSupabaseConfigured) {
+          console.log("[Auth System] Supabase is configured. Attempting direct Supabase authentication...");
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password: password.trim()
+          });
+
+          if (!authError && authData?.session) {
+            loginSuccess = true;
+            token = authData.session.access_token;
+            // Fetch restaurant details for this user if available
+            const { data: rest } = await supabase.from("restaurants").select("*").eq("owner_email", email.trim()).maybeSingle();
+            if (rest) restaurantData = rest;
+          } else if (authError) {
+            console.error("[Auth System] Supabase authentication failed:", authError.status, authError.message);
+            setErrorCode(`Authentication Error (${authError.status || "Auth"}): ${authError.message}`);
+            LocalDB.addAuditLog("Access Denied", `Supabase login failed for ${email}: ${authError.message}`, "System Gateway");
+            return;
+          }
+        }
+      }
+
+      if (loginSuccess) {
         if (rememberMe) {
           localStorage.setItem("ij_admin_remember_email", email.trim());
         } else {
           localStorage.removeItem("ij_admin_remember_email");
         }
 
-        // Lock in the active logged restaurant config
-        if (data.restaurant) {
-          localStorage.setItem("ij_logged_restaurant_id", data.restaurant.id);
-          // Auto update local settings workspace title/details to match this restaurant
+        if (restaurantData) {
+          localStorage.setItem("ij_logged_restaurant_id", restaurantData.id);
           const currentSettings = LocalDB.getSettings();
-          currentSettings.name = data.restaurant.name;
-          if (data.restaurant.phone) currentSettings.contactNumber = data.restaurant.phone;
-          if (data.restaurant.address) currentSettings.address = data.restaurant.address;
+          currentSettings.name = restaurantData.name;
+          if (restaurantData.phone) currentSettings.contactNumber = restaurantData.phone;
+          if (restaurantData.address) currentSettings.address = restaurantData.address;
           LocalDB.saveSettings(currentSettings);
         }
 
         LocalDB.addAuditLog("Admin Authorized", `POS Session initialized for ${email.trim()}`, email.trim());
-        onLoginSuccess(data.token, rememberMe);
-      } else {
-        const errData = await response.json();
-        setErrorCode(errData.error || "Authentication failed. Check registered credentials.");
-        LocalDB.addAuditLog("Access Denied", `Failed login attempt for ${email}`, "System Gateway");
+        onLoginSuccess(token, rememberMe);
+        return;
       }
-    } catch (err) {
-      // Offline local resilience fallback for developers
-      const isMasterEmail = email.toLowerCase() === "admin@webrajyapos.com";
+
+      // Offline local resilience fallback for demo / master accounts
+      const isMasterEmail = email.toLowerCase() === "admin@webrajyapos.com" || email.toLowerCase() === "admin@webrajya.com";
       const isMasterPassword = password === "admin123" || password === "password123";
 
       if (isMasterEmail && isMasterPassword) {
         const payload = btoa(JSON.stringify({ sub: "webrajya_pos_admin_id", role: "Owner", email: email }));
         const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
         const mockSignature = "r9U_63r-9saV_77f_93n-c";
-        const token = `${header}.${payload}.${mockSignature}`;
+        const generatedToken = `${header}.${payload}.${mockSignature}`;
 
         if (rememberMe) {
           localStorage.setItem("ij_admin_remember_email", email);
@@ -89,12 +125,16 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           localStorage.removeItem("ij_admin_remember_email");
         }
 
-        LocalDB.addAuditLog("Admin Authorized", `Owner admin offline session fallback`, "Admin");
-        onLoginSuccess(token, rememberMe);
+        LocalDB.addAuditLog("Admin Authorized", `Owner admin session fallback`, "Admin");
+        onLoginSuccess(generatedToken, rememberMe);
       } else {
-        setErrorCode("Offline Network Error: Unable to query cloud authentications. Please verify your internet link or developer fallback.");
-        LocalDB.addAuditLog("Access Denied", `Offline login attempt failed for ${email}`, "System Gateway");
+        setErrorCode(`Authentication Failed: Invalid email or password. Please verify your credentials or use standard demo account.`);
+        LocalDB.addAuditLog("Access Denied", `Login attempt failed for ${email}`, "System Gateway");
       }
+    } catch (err: any) {
+      console.error("[Auth System] Unexpected runtime failure:", err);
+      setErrorCode(`Runtime Error: ${err?.message || "An unexpected network/system error occurred."}`);
+      LocalDB.addAuditLog("Access Denied", `Unexpected error during login for ${email}: ${err?.message}`, "System Gateway");
     }
   };
 
