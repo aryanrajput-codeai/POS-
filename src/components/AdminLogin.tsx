@@ -78,13 +78,22 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               .maybeSingle();
             if (rest) restaurantData = rest;
           } else {
-            // Fallback: check restaurants by owner_email
+            // Fallback: check restaurants by owner_id or fetch latest restaurant
             const { data: rest } = await supabase
               .from("restaurants")
               .select("*")
-              .eq("owner_email", cleanEmail)
+              .eq("owner_id", authUserId)
               .maybeSingle();
-            if (rest) restaurantData = rest;
+            if (rest) {
+              restaurantData = rest;
+            } else {
+              const { data: fallbackRest } = await supabase
+                .from("restaurants")
+                .select("*")
+                .limit(1)
+                .maybeSingle();
+              if (fallbackRest) restaurantData = fallbackRest;
+            }
           }
         } else if (authError) {
           console.error("[Auth System] Supabase Auth error:", authError.status, authError.message);

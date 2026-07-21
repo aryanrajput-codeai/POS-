@@ -356,8 +356,8 @@ function writeDb(data: any) {
 
 // Supabase cloud synchronization engine
 async function syncOrderToSupabase(order: any, isUpdate = false) {
-  const supabaseUrl = process.env.SUPABASE_URL || "https://uhvxkulqovkasewxfais.supabase.co";
-  const supabaseKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_935p_1HOmvJr1p9dhFlb2g_zMA957jI";
+  const supabaseUrl = process.env.SUPABASE_URL || "https://krvlckokabfhivmegukb.supabase.co";
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtydmxja29rYWJmaGl2bWVndWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODkyODcsImV4cCI6MjA5OTg2NTI4N30.-wl0k_-Iq_WjQUPKi35ttuuY5ybsQdvGVbDH42RGQv4";
 
   if (!supabaseUrl || !supabaseKey) {
     console.warn("[Supabase] Configuration is absent. Skipping cloud ledger write.");
@@ -462,8 +462,8 @@ async function syncOrderToSupabase(order: any, isUpdate = false) {
 
 // Supabase registered restaurants helpers
 async function fetchRestaurantsFromSupabase() {
-  const supabaseUrl = process.env.SUPABASE_URL || "https://uhvxkulqovkasewxfais.supabase.co";
-  const supabaseKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_935p_1HOmvJr1p9dhFlb2g_zMA957jI";
+  const supabaseUrl = process.env.SUPABASE_URL || "https://krvlckokabfhivmegukb.supabase.co";
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtydmxja29rYWJmaGl2bWVndWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODkyODcsImV4cCI6MjA5OTg2NTI4N30.-wl0k_-Iq_WjQUPKi35ttuuY5ybsQdvGVbDH42RGQv4";
   if (!supabaseUrl || !supabaseKey) return [];
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/restaurants`, {
@@ -537,8 +537,8 @@ async function startServer() {
     let matchedRest: any = null;
 
     // Check with live Supabase first
-    const supabaseUrl = process.env.SUPABASE_URL || "https://uhvxkulqovkasewxfais.supabase.co";
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_935p_1HOmvJr1p9dhFlb2g_zMA957jI";
+    const supabaseUrl = process.env.SUPABASE_URL || "https://krvlckokabfhivmegukb.supabase.co";
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtydmxja29rYWJmaGl2bWVndWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODkyODcsImV4cCI6MjA5OTg2NTI4N30.-wl0k_-Iq_WjQUPKi35ttuuY5ybsQdvGVbDH42RGQv4";
     
     try {
       const response = await fetch(`${supabaseUrl}/rest/v1/restaurants?email=eq.${encodeURIComponent(emailLower)}`, {
@@ -606,8 +606,8 @@ async function startServer() {
   });
 
   app.get("/api/restaurants", async (req, res) => {
-    const supabaseUrl = process.env.SUPABASE_URL || "https://uhvxkulqovkasewxfais.supabase.co";
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_935p_1HOmvJr1p9dhFlb2g_zMA957jI";
+    const supabaseUrl = process.env.SUPABASE_URL || "https://krvlckokabfhivmegukb.supabase.co";
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtydmxja29rYWJmaGl2bWVndWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODkyODcsImV4cCI6MjA5OTg2NTI4N30.-wl0k_-Iq_WjQUPKi35ttuuY5ybsQdvGVbDH42RGQv4";
     
     const db = readDb();
     if (!db.restaurants) {
@@ -699,8 +699,8 @@ async function startServer() {
       createdAt: new Date().toISOString()
     };
 
-    const supabaseUrl = process.env.SUPABASE_URL || "https://uhvxkulqovkasewxfais.supabase.co";
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || "sb_publishable_935p_1HOmvJr1p9dhFlb2g_zMA957jI";
+    const supabaseUrl = process.env.SUPABASE_URL || "https://krvlckokabfhivmegukb.supabase.co";
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtydmxja29rYWJmaGl2bWVndWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODkyODcsImV4cCI6MjA5OTg2NTI4N30.-wl0k_-Iq_WjQUPKi35ttuuY5ybsQdvGVbDH42RGQv4";
 
     try {
       console.log("[Supabase Restaurant Registering] Posting payload to PostgREST:", sbPayload);
