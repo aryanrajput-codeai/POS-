@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Search, Sparkles, Flame, Check, ThumbsUp, Leaf } from "lucide-react";
 import { motion } from "motion/react";
-import { categories } from "../data";
 import { Category } from "../types";
 
 interface HeaderProps {
@@ -13,6 +12,7 @@ interface HeaderProps {
   onVegOnlyChange: (show: boolean) => void;
   showBestsellersOnly: boolean;
   onBestsellersChange: (show: boolean) => void;
+  categories?: Category[];
 }
 
 export default function Header({
@@ -23,7 +23,8 @@ export default function Header({
   showVegOnly,
   onVegOnlyChange,
   showBestsellersOnly,
-  onBestsellersChange
+  onBestsellersChange,
+  categories = []
 }: HeaderProps) {
   const [searchValue, setSearchValue] = useState("");
 
